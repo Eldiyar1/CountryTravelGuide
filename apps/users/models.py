@@ -20,6 +20,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False, verbose_name="Сотрудник")
     is_superuser = models.BooleanField(default=False, verbose_name="Суперпользователь")
     code = models.CharField(max_length=6, verbose_name='Код подтверждения')
+    is_hotel = models.BooleanField(default=False)
+    is_kitchen = models.BooleanField(default=False)
+    editor = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('first_name', 'last_name', 'password')
