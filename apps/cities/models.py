@@ -5,7 +5,7 @@ from ..users import models as users
 class Base(models.Model):
     title = models.CharField(max_length=255)
     descriptions = models.TextField(null=True, blank=True)
-    images = models.ManyToManyField('Image')
+    images = models.ManyToManyField('Image', blank=True)
 
     def __str__(self):
         return self.title
@@ -20,8 +20,13 @@ class Image(models.Model):
         return self.image.name
 
 
+class Specialties(Base):
+    def __str__(self):
+        return self.title
+
+
 class Region(Base):
-    regional_specialties = models.TextField()
+    regional_specialties = models.ManyToManyField(Specialties)
 
 
 class City(Base):
@@ -35,18 +40,14 @@ class Hotel(Base):
     city_hotel = models.ForeignKey(City, on_delete=models.CASCADE, related_name='city_hotel')
 
 
-class Menu(models.Model):
-    kitchen = models.ForeignKey('Kitchen', on_delete=models.CASCADE, related_name='kitchen_menu')
-    name = models.CharField(max_length=255)
-    description = models.TextField()
-    images = models.ManyToManyField(Image, blank=True)
+class Menu(Base):
     price = models.PositiveIntegerField()
 
 
 class Kitchen(Base):
     user = models.ForeignKey(users.User, on_delete=models.SET_NULL, null=True, blank=True)
     city_kitchen = models.ForeignKey(City, on_delete=models.CASCADE, related_name='city_kitchen')
-    menu = models.ForeignKey(Menu, on_delete=models.CASCADE, related_name='menus', null=True, blank=True)
+    menu = models.ManyToManyField(Menu, blank=True)
 
 
 class Event(Base):

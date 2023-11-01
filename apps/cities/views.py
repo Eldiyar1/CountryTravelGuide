@@ -8,7 +8,6 @@ from .permissions import OnlyGet, KitchenPermission, MenuPermission
 from .utils import calculate_file_hash, get_client_ip
 
 
-
 class ImageViewSet(viewsets.ModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
