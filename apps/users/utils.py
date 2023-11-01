@@ -16,3 +16,12 @@ def send_email_confirm(email):
     user_obj = User.objects.get(email=email)
     user_obj.code = random.randint(100000, 999999)
     user_obj.save()
+
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip

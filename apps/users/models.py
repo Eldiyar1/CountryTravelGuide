@@ -36,3 +36,17 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name} - {self.email}'
+
+
+class AnonymousUser(models.Model):
+    ip_address = models.GenericIPAddressField()
+    session_key = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.session_key
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    anonymous_user = models.ForeignKey(AnonymousUser, on_delete=models.CASCADE, null=True, blank=True)
+    text = models.TextField()

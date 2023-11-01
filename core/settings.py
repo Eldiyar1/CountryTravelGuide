@@ -30,7 +30,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-# Application definition
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_NAME = 'session_key'
+SESSION_COOKIE_AGE = 1728000  # 20 Days
+SESSION_SAVE_EVERY_REQUEST = True
 
 INSTALLED_APPS = [
     'jazzmin',

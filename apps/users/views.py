@@ -2,11 +2,13 @@ from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
-from .utils import send_email_confirm
-from .models import User
-from .serializer import RegisterSerializer, LoginSerializer, ConfirmSerializer
+from .utils import send_email_confirm, get_client_ip
+from .models import User, Notification, AnonymousUser
+from .serializer import RegisterSerializer, LoginSerializer, ConfirmSerializer, NotificationSerializer
+from .permissions import NotificationPermission
 
 
 class RegisterAPIView(CreateAPIView):
@@ -26,6 +28,7 @@ class LoginAPIView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+
         if serializer.is_valid():
 
             email = serializer.validated_data.get('email')
@@ -52,10 +55,10 @@ class ConfirmAPIView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data('email')
-            code = serializer.validated_data('code')
-
+            email = serializer.validated_data['email']
+            code = serializer.validated_data['code']
             user = User.objects.filter(email=email).first()
+
             if not user:
                 return Response({'error': 'Неверный email.'}, status=400)
 
@@ -67,3 +70,24 @@ class ConfirmAPIView(CreateAPIView):
 
             return Response({'message': 'Аккаунт успешно подтвержден.'}, status=200)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NotificationView(APIView):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [NotificationPermission]
+
+    def get(self, request):
+        if self.request.user.is_authenticated:
+            user = self.request.user
+            notifications = Notification.objects.filter(user=user)
+            return Response(NotificationSerializer(notifications, many=True).data, status=status.HTTP_200_OK)
+        else:
+            ip_address = get_client_ip(request)
+            session_key = request.session.session_key
+            if session_key:
+                anonymous, created = AnonymousUser.objects.get_or_create(ip_address=ip_address)
+                anonymous.session_key = session_key
+                return Response(NotificationSerializer(Notification.objects.filter(anonymous_user=anonymous)).data,
+                                status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "You have no session key, must be a tester"})
