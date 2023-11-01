@@ -12,7 +12,7 @@ class Base(models.Model):
 
 
 class Image(models.Model):
-    user = models.ForeignKey(users.User, on_delete=models.CASCADE, null=True, blank=True)
+    # user = models.ForeignKey(users.User, on_delete=models.CASCADE, null=True, blank=True)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     hash = models.CharField(max_length=32, unique=True, null=True, blank=True)
     image_path = models.CharField(max_length=255)

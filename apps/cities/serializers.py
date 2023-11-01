@@ -26,7 +26,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Image
-        fields = ('id', 'image', 'hash')
+        fields = ('id', 'image', 'hash', 'image_path')
 
 
 class MenuSerializer(serializers.ModelSerializer):
