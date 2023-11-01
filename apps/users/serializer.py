@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from .models import User
+from .models import User, Notification
 from phonenumber_field.serializerfields import PhoneNumberField
 
 
@@ -28,3 +28,9 @@ class LoginSerializer(serializers.Serializer):
 class ConfirmSerializer(serializers.Serializer):
     email = serializers.EmailField()
     code = serializers.CharField()
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'

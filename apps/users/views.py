@@ -2,12 +2,13 @@ from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 from .utils import send_email_confirm
-from .models import User
-from .serializer import RegisterSerializer, LoginSerializer, ConfirmSerializer
-
+from .models import User, Notification
+from .serializer import RegisterSerializer, LoginSerializer, ConfirmSerializer, NotificationSerializer
+from .permissions import NotificationPermission
 
 class RegisterAPIView(CreateAPIView):
     serializer_class = RegisterSerializer
@@ -26,6 +27,7 @@ class LoginAPIView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+
         if serializer.is_valid():
 
             email = serializer.validated_data.get('email')
@@ -52,10 +54,10 @@ class ConfirmAPIView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data('email')
-            code = serializer.validated_data('code')
-
+            email = serializer.validated_data['email']
+            code = serializer.validated_data['code']
             user = User.objects.filter(email=email).first()
+
             if not user:
                 return Response({'error': 'Неверный email.'}, status=400)
 
@@ -67,3 +69,17 @@ class ConfirmAPIView(CreateAPIView):
 
             return Response({'message': 'Аккаунт успешно подтвержден.'}, status=200)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NotificationView(APIView):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [NotificationPermission]
+
+    def get(self, request):
+        if self.request.user.is_authenticated:
+            user = self.request.user
+            notifications = Notification.objects.filter(user=user)
+            return Response(NotificationSerializer(notifications, many=True).data, status=status.HTTP_200_OK)
+        else:
+            return Response(NotificationSerializer(Notification.objects.none()).data, status=status.HTTP_404_NOT_FOUND)

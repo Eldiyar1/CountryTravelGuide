@@ -16,3 +16,5 @@ def send_email_confirm(email):
     user_obj = User.objects.get(email=email)
     user_obj.code = random.randint(100000, 999999)
     user_obj.save()
+
+

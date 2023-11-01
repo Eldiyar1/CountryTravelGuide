@@ -12,7 +12,6 @@ class Base(models.Model):
 
 
 class Image(models.Model):
-    # user = models.ForeignKey(users.User, on_delete=models.CASCADE, null=True, blank=True)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     hash = models.CharField(max_length=32, unique=True, null=True, blank=True)
     image_path = models.CharField(max_length=255)
@@ -27,6 +26,8 @@ class Region(Base):
 
 class City(Base):
     city_region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='city_region')
+    subscribers = models.ManyToManyField(users.User, blank=True)
+    anonymous_subscribers = models.ManyToManyField(users.AnonymousUser, blank=True)
 
 
 class Hotel(Base):
@@ -38,7 +39,7 @@ class Menu(models.Model):
     kitchen = models.ForeignKey('Kitchen', on_delete=models.CASCADE, related_name='kitchen_menu')
     name = models.CharField(max_length=255)
     description = models.TextField()
-    images = models.ManyToManyField(Image, null=True, blank=True)
+    images = models.ManyToManyField(Image, blank=True)
     price = models.PositiveIntegerField()
 
 
