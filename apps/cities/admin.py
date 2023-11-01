@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Region, City, Image, Hotel, Event, Kitchen, Attraction, Menu, Specialties
+from .models import Region, City, Image, Hotel, Event, Kitchen, Attraction, Menu, Specialties, Rating
 
 
 @admin.register(Region)
@@ -35,3 +35,8 @@ class MenuAdmin(admin.ModelAdmin):
 @admin.register(Specialties)
 class SpecialityAdmin(admin.ModelAdmin):
     list_display = ['id', 'title']
+
+
+@admin.register(Rating)
+class RatingAdmin(admin.ModelAdmin):
+    list_display = ['value']
