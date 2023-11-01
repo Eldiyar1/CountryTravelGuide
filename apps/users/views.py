@@ -5,10 +5,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
-from .utils import send_email_confirm
-from .models import User, Notification
+from .utils import send_email_confirm, get_client_ip
+from .models import User, Notification, AnonymousUser
 from .serializer import RegisterSerializer, LoginSerializer, ConfirmSerializer, NotificationSerializer
 from .permissions import NotificationPermission
+
 
 class RegisterAPIView(CreateAPIView):
     serializer_class = RegisterSerializer
@@ -82,4 +83,11 @@ class NotificationView(APIView):
             notifications = Notification.objects.filter(user=user)
             return Response(NotificationSerializer(notifications, many=True).data, status=status.HTTP_200_OK)
         else:
-            return Response(NotificationSerializer(Notification.objects.none()).data, status=status.HTTP_404_NOT_FOUND)
+            ip_address = get_client_ip(request)
+            session_key = request.session.session_key
+            if session_key:
+                anonymous, created = AnonymousUser.objects.get_or_create(ip_address=ip_address)
+                anonymous.session_key = session_key
+                return Response(NotificationSerializer(Notification.objects.filter(anonymous_user=anonymous)).data,
+                                status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "You have no session key, must be a tester"})

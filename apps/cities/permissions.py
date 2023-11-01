@@ -3,7 +3,7 @@ from rest_framework import permissions
 
 class OnlyGet(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method == 'GET':
+        if request.method == 'GET' or view.action == 'subscribe':
             return True
         else:
             return False
