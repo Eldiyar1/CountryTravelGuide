@@ -19,5 +19,4 @@ urlpatterns = [
     path('', include(region_router.urls)),
     path('', include(city_router.urls)),
     path('', include(kitchen_router.urls)),
-
 ]
