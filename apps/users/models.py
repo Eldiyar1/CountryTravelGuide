@@ -19,7 +19,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=False, verbose_name="Активен")
     is_staff = models.BooleanField(default=False, verbose_name="Сотрудник")
     is_superuser = models.BooleanField(default=False, verbose_name="Суперпользователь")
-    code = models.CharField(max_length=6, verbose_name='Код подтверждения')
+    code = models.CharField(max_length=4, null=True, verbose_name='Код подтверждения')
     is_hotel = models.BooleanField(default=False)
     is_kitchen = models.BooleanField(default=False)
     editor = models.BooleanField(default=False)
@@ -50,3 +50,9 @@ class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     anonymous_user = models.ForeignKey(AnonymousUser, on_delete=models.CASCADE, null=True, blank=True)
     text = models.TextField()
+
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=100)
+    time = models.DateTimeField()

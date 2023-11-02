@@ -30,6 +30,18 @@ class ConfirmSerializer(serializers.Serializer):
     code = serializers.CharField()
 
 
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+
+class PasswordResetCodeSerializer(serializers.Serializer):
+    code = serializers.CharField(required=True)
+
+
+class PasswordResetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(style={"input_type": "password"}, help_text="From 6 to 20", min_length=6)
+
+
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
