@@ -40,7 +40,6 @@ class Image(models.Model):
     def __str__(self):
         return self.image.name
 
-
 class Specialties(Base):
     def __str__(self):
         return self.title

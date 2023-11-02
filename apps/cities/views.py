@@ -17,24 +17,24 @@ class ImageViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         image_file = request.data.get('image')
-        # if request.user.is_authenticated:
-        if image_file:
-            image_hash = calculate_file_hash(image_file)
-            existing_image = Image.objects.filter(hash=image_hash).first()
+        if request.user.is_authenticated:
+            if image_file:
+                image_hash = calculate_file_hash(image_file)
+                existing_image = Image.objects.filter(hash=image_hash).first()
 
-            if existing_image:
-                serializer = ImageSerializer(existing_image)
-                return response.Response(serializer.data, status=status.HTTP_200_OK)
+                if existing_image:
+                    serializer = ImageSerializer(existing_image)
+                    return response.Response(serializer.data, status=status.HTTP_200_OK)
+                else:
+                    image = Image(image=image_file, hash=image_hash)
+                    image.image_path = image.image.url
+                    image.save()
+                    serializer = ImageSerializer(image)
+                    return response.Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                image = Image(image=image_file, hash=image_hash)
-                image.image_path = image.image.url
-                image.save()
-                serializer = ImageSerializer(image)
-                return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+                return response.Response({'error': 'No image provided'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return response.Response({'error': 'No image provided'}, status=status.HTTP_400_BAD_REQUEST)
-        # else:
-        #     return response.Response({'error': 'You need to authenticate'}, status=status.HTTP_403_FORBIDDEN)
+            return response.Response({'error': 'You need to authenticate'}, status=status.HTTP_403_FORBIDDEN)
 
 
 class RegionsViewSet(viewsets.ModelViewSet):
