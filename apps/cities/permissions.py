@@ -11,10 +11,10 @@ class OnlyGet(permissions.BasePermission):
 
 class KitchenPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            return request.user.is_kitchen
+        if view.action == 'add_rating':
+            return True
         else:
-            return True if request.method == 'GET' else False
+            return True if request.method == 'GET' else request.user.is_kitchen
 
 
 class MenuPermission(permissions.BasePermission):

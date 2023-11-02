@@ -10,7 +10,7 @@ from django.utils import timezone
 from .utils import send_email_confirm, get_client_ip, confirmation_code, send_email_reset_password, recovery_code
 from .models import User, Notification, AnonymousUser, PasswordResetToken
 from .serializer import RegisterSerializer, LoginSerializer, ConfirmSerializer, PasswordResetSerializer, \
-    PasswordResetCodeSerializer, PasswordResetNewPasswordSerializer
+    PasswordResetCodeSerializer, PasswordResetNewPasswordSerializer, NotificationSerializer
 from .permissions import NotificationPermission
 
 
@@ -140,3 +140,24 @@ class PasswordResetNewPasswordAPIView(CreateAPIView):
             return Response(data={"detail": "Пароль успешно обновлен"}, status=status.HTTP_200_OK)
         else:
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NotificationView(APIView):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [NotificationPermission]
+
+    def get(self, request):
+        if self.request.user.is_authenticated:
+            user = self.request.user
+            notifications = Notification.objects.filter(user=user)
+            return Response(NotificationSerializer(notifications, many=True).data, status=status.HTTP_200_OK)
+        else:
+            ip_address = get_client_ip(request)
+            session_key = request.session.session_key
+            if session_key:
+                anonymous, created = AnonymousUser.objects.get_or_create(ip_address=ip_address)
+                anonymous.session_key = session_key
+                return Response(NotificationSerializer(Notification.objects.filter(anonymous_user=anonymous)).data,
+                                status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "You have no session key, must be a tester"})
